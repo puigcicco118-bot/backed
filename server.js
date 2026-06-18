@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 require('dotenv').config();
 const Account = require('./models/Account');
 const Register = require('./models/register');
-
+const initWebSocket = require('./models/ws');
 mongoose
   .connect(process.env.MONGO_URL)
   // .connect('mongodb://127.0.0.1:27017/my_admin_db')
@@ -11,6 +11,8 @@ mongoose
 
 const express = require('express');
 const app = express(); // 解析 JSON 请求体 app.use(express.json());
+const http = require('http');
+const server = http.createServer(app);
 
 const cors = require('cors');
 app.use(cors());
@@ -77,7 +79,8 @@ mongodb: app.post('/api/verification', async (req, res) => {
     res.status(500).json({ error: '' });
   }
 });
-
+initWebSocket(server);
 // 启动服务器
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {});
+
+server.listen(PORT, () => {});
