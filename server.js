@@ -107,8 +107,10 @@ mongodb: app.post('/api/backLogin', async (req, res) => {
     if (!user) {
       return res.status(400).json({ code: 1, message: '邮箱或密码错误' });
     }
+    console.log(user, '===');
+    console.log(jwt, '+++++++++');
+
     const token = jwt.sign({ account }, SECRET_KEY, { expiresIn: '2h' });
-    console.log(token);
 
     // 4. 登录成功
     res.status(200).json({
