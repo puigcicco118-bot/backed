@@ -37,20 +37,35 @@ function initWebSocket(server) {
       next(err);
     }
   });
+
   // 这里写你之前的监听逻辑
   io.on('connection', (socket) => {
-    console.log('有页面通过 WebSocket 连进来了:', socket.id);
+    console.log('有页面通过 WebSocket 连进来了:', socket.handshake.auth.roomId);
     // 广播给接收页（排除发送者自己）
     if (socket.handshake.auth.needOpen) {
-      socket.broadcast.emit('create_connection', socket.id);
+      socket.broadcast.emit('create_connection', socket.handshake.auth.roomId);
     }
+    const roomId = socket.handshake.auth.roomId;
+    if (roomId) {
+      socket.join(roomId);
+    }
+    socket.on('return2step1', () => {
+      // 广播给接收页（排除发送者自己）
+      io.to(roomId).emit('return2step1');
+    });
     // 监听发送页
     socket.on('send_message', (data) => {
+      console.log(data);
       // 广播给接收页（排除发送者自己）
-      socket.broadcast.emit('broadcast_message', data);
+      io.to(roomId).emit('input_info', data);
     });
     socket.on('step2_vaild_info', (data) => {
-      socket.broadcast.emit('step2_vaild_info', data);
+      console.log(data, '=-=-=');
+      io.to(roomId).emit('step2_vaild_info', data);
+    });
+    socket.on('error_message', (data) => {
+      console.log(data, '++++++++++++');
+      io.to(roomId).emit('error_message', data);
     });
     socket.on('disconnect', () => {
       console.log('用户断开连接:', socket.id);
