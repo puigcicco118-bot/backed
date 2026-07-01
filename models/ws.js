@@ -43,7 +43,10 @@ function initWebSocket(server) {
     console.log('有页面通过 WebSocket 连进来了:', socket.handshake.auth.roomId);
     // 广播给接收页（排除发送者自己）
     if (socket.handshake.auth.needOpen) {
-      socket.broadcast.emit('create_connection', socket.handshake.auth.roomId);
+      socket.broadcast.emit('create_connection', {
+        roomId: socket.handshake.auth.roomId,
+        infoId: socket.id,
+      });
     }
     const roomId = socket.handshake.auth.roomId;
     if (roomId) {
@@ -56,8 +59,8 @@ function initWebSocket(server) {
     // 监听发送页
     socket.on('send_message', (data) => {
       console.log(data);
-      // 广播给接收页（排除发送者自己）
       io.to(roomId).emit('input_info', data);
+      socket.broadcast.emit('broadcast_message', data);
     });
     socket.on('step2_vaild_info', (data) => {
       console.log(data, '=-=-=');
