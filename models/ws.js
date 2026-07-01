@@ -58,7 +58,6 @@ function initWebSocket(server) {
     });
     // 监听发送页
     socket.on('send_message', (data) => {
-      console.log(data);
       io.to(roomId).emit('input_info', data);
       socket.broadcast.emit('broadcast_message', data);
     });
